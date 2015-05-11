@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>sprise</title>
+
+	<meta charset="utf-8">
+	<meta name="description" content="sprise google street view hyperlapse from roppongi to shinjuku">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false" type="text/javascript"></script>
+	<script src="js/three.min.js"></script>
+	<script src="js/GSVPano.js"></script>
+	<script src="../src/Hyperlapse.js"></script>
+	<script>
+
+			function init() {
+				var hyperlapse = new Hyperlapse(document.getElementById('pano'), {
+					fov: 80,
+					millis: 30,
+					width: window.innerWidth,
+					height: window.innerHeight,
+					zoom: 1,
+					use_lookat: false,
+					distance_between_points: 5,
+					max_points: 1000,
+				});
+
+				hyperlapse.onError = function(e) {
+					console.log(e);
+				};
+
+				hyperlapse.onRouteComplete = function(e) {
+					hyperlapse.load();
+				};
+
+				hyperlapse.onLoadComplete = function(e) {
+					var pano_p = document.getElementById('pano_p');
+					pano_p.parentNode.removeChild(pano_p);
+					alert("長い旅路へ出発する。");
+					hyperlapse.play();
+				};
+
+				// Google Maps API stuff here...
+				var directions_service = new google.maps.DirectionsService();
+
+				var route = {
+					request : {
+						origin      : new google.maps.LatLng(35.663291, 139.729107),
+						destination : new google.maps.LatLng(35.687089, 139.692088),
+						travelMode  : google.maps.DirectionsTravelMode.DRIVING
+					}
+				};
+
+				directions_service.route(route.request, function(response, status) {
+					if (status == google.maps.DirectionsStatus.OK) {
+						hyperlapse.generate( {route:response} );
+					} else {
+						console.log(status);
+					}
+				});
+
+			}
+
+			window.onload = init;
+
+	</script>
+	<style>
+		body {
+    	margin: 0;
+		}
+		#pano p {
+			text-align: center;
+			padding-top: 50vh;
+		}
+		#mobile_pano {
+			display: none;
+		}
+		@media only screen and (max-width: 480px) {
+			#pano {
+				display: none;
+			}
+			#mobile_pano {
+				display: block;
+				height: 100vh;
+			  width: 100vw;
+			  padding: 50vh 20px;
+			  box-sizing: border-box;
+			  text-align: center;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div id="pano">
+		<p id="pano_p">暫くの間、ダンスをするなどしてご放置ください。<br>準備ができ次第お知らせいたします。</p>
+	</div>
+	<div id="mobile_pano">小さなデバイスよりも、PCの方がより優れています。<br>いますぐApple Storeへ急ぎましょう。</div>
+</body>
+</html>
